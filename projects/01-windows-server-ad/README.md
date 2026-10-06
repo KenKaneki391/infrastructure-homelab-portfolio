@@ -10,7 +10,7 @@ Ce projet est basé sur des **preuves réelles de laboratoire** : architecture, 
 
 - `Win19` — Windows Server 2019, contrôleur de domaine, DNS et File Server ;
 - domaine `lab.local` ;
-- FortiGate — passerelle, firewall et DHCP ;
+- FortiGate 80F — passerelle, firewall, VLAN et DHCP ;
 - `MININT-J8ODACM` — poste Windows 10 membre du domaine ;
 - réseaux de lab `192.168.10.0/24` et `192.168.30.0/24`.
 
@@ -63,6 +63,34 @@ Le scénario démontre :
 - validation finale en lecture et écriture.
 
 Documentation : [SMB-NTFS-SCENARIO-SUMMARY.md](SMB-NTFS-SCENARIO-SUMMARY.md)
+
+## Réseau / VLAN30 / DHCP
+
+Le VLAN30 a été vérifié directement sur le FortiGate et depuis le poste client.
+
+Configuration observée :
+
+- interface `vlan30` / alias `Vlan30-VM` ;
+- VLAN ID `30` ;
+- passerelle `192.168.30.1/24` ;
+- serveur DNS Active Directory distribué : `192.168.30.50` ;
+- client `MININT-J8ODACM` : `192.168.30.52` ;
+- DHCP local FortiGate actif sur `vlan30` ;
+- plage DHCP observée : `192.168.30.50` à `192.168.30.200` ;
+- PXE `next-server` : `192.168.30.51` ;
+- boot file MECM/PXE : `SMSBoot\\LAB00002\\x64\\wdsnbp.com`.
+
+Le client confirme via `ipconfig /all` :
+
+- passerelle `192.168.30.1` ;
+- serveur DHCP vu par Windows `192.168.30.1` ;
+- DNS `192.168.30.50`.
+
+L'audit de configuration a également révélé un **DHCP Relay vers `192.168.30.245` configuré simultanément avec le serveur DHCP local** sur la même interface. Ce point est documenté comme anomalie à corriger.
+
+Autre amélioration identifiée : les IP d'infrastructure `192.168.30.50` (DC/DNS) et `192.168.30.51` (PXE) se trouvent actuellement dans la plage DHCP dynamique. Elles doivent être exclues afin d'éviter les conflits d'adresses.
+
+Cette découverte est volontairement conservée dans le portfolio : elle démontre une démarche d'audit réelle plutôt qu'une architecture présentée artificiellement comme parfaite.
 
 ## DNS et découverte Active Directory
 
@@ -143,6 +171,8 @@ Un script non destructif d'audit Active Directory est publié dans [`scripts/pow
 - ciblage de GPO et Security Filtering ;
 - permissions SMB vs NTFS ;
 - modèle AGDLP ;
+- segmentation VLAN et validation DHCP/DNS ;
+- identification d'anomalies de configuration réseau ;
 - distinction authentification / autorisation ;
 - utilisation de PowerShell ;
 - dépannage structuré basé sur des preuves ;
