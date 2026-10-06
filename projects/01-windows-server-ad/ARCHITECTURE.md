@@ -7,7 +7,7 @@ Cette page décrit la topologie réellement utilisée dans le laboratoire person
 ```mermaid
 flowchart LR
     INTERNET[Internet]
-    FG[FortiGate\nGateway / Firewall]
+    FG[FortiGate\nGateway / Firewall / VLAN / DHCP]
     NET10[Réseau lab A\n192.168.10.0/24]
     NET30[Réseau lab B / VLAN 30\n192.168.30.0/24]
     DC[Win19\nWindows Server 2019 Datacenter Eval\n192.168.30.50\nAD DS + DNS + File Server]
@@ -27,8 +27,8 @@ flowchart LR
 | Composant | Rôle | OS / Plateforme | Adresse | Notes |
 |---|---|---|---|---|
 | `Win19` | Domain Controller, DNS, File Server | Windows Server 2019 Datacenter Evaluation | `192.168.30.50/24` | IP statique |
-| FortiGate | Gateway, firewall, VLAN, DHCP | FortiGate 80F | `192.168.10.1` et `192.168.30.1` | DHCP local confirmé sur plusieurs interfaces |
-| `MININT-J8ODACM` | Poste membre du domaine | Windows 10 build 19045 | `192.168.10.124/24` + `192.168.30.52/24` | Deux NICs actives, toutes deux en DHCP |
+| FortiGate | Gateway, firewall, VLAN, DHCP | FortiGate 80F | `192.168.10.1` et `192.168.30.1` | DHCP local |
+| `MININT-J8ODACM` | Poste membre du domaine | Windows 10 build 19045 | `192.168.10.124/24` + `192.168.30.100/24` observés | Deux NICs actives, toutes deux en DHCP |
 
 ## Domaine Active Directory
 
@@ -79,42 +79,39 @@ Le laboratoire contient également plusieurs comptes utilisateurs fictifs utilis
 
 ### VLAN 30 — `192.168.30.0/24`
 
-Configuration vérifiée sur le FortiGate :
+Configuration finale vérifiée sur le FortiGate :
 
 - **Interface :** `vlan30` / alias `Vlan30-VM`
 - **VLAN ID :** `30`
 - **Passerelle :** `192.168.30.1/24`
 - **DC / DNS :** `192.168.30.50`
-- **Client observé :** `192.168.30.52`
 - **DHCP local FortiGate :** actif sur `vlan30`
-- **Plage DHCP observée :** `192.168.30.50` à `192.168.30.200`
+- **Plage DHCP :** `192.168.30.100` à `192.168.30.200`
 - **DNS distribué :** `192.168.30.50`
-- **PXE next-server :** `192.168.30.51`
+- **PXE next-server configuré :** `192.168.30.51`
 - **Boot file :** `SMSBoot\\LAB00002\\x64\\wdsnbp.com`
 
-Le client `MININT-J8ODACM` confirme via `ipconfig /all` :
+Le client `MININT-J8ODACM` confirme après renouvellement du bail :
 
-- IPv4 `192.168.30.52`
+- IPv4 `192.168.30.100`
 - passerelle `192.168.30.1`
-- serveur DHCP vu par Windows `192.168.30.1`
+- serveur DHCP `192.168.30.1`
 - serveur DNS `192.168.30.50`
 
-### Configuration obsolète découverte
+### Audit et correction DHCP
 
-L'interface `vlan30` contient encore :
+L'audit a révélé deux problèmes de configuration :
 
-```text
-set dhcp-relay-service enable
-set dhcp-relay-ip "192.168.30.245"
-```
+1. un ancien DHCP Relay vers `192.168.30.245`, adresse qui ne correspond à aucun serveur du laboratoire ;
+2. une plage DHCP qui commençait à `192.168.30.50`, alors que `.50` est l'adresse statique du DC/DNS et `.51` est configurée comme `next-server` PXE.
 
-L'adresse `192.168.30.245` ne correspond à aucun serveur DHCP existant dans le laboratoire. Il s'agit d'une ancienne configuration de relay ajoutée par erreur et devenue obsolète.
+Corrections appliquées :
 
-Le service DHCP réellement utilisé sur VLAN30 est le **serveur DHCP local du FortiGate** (`config system dhcp server`, `edit 30`). Le comportement côté client le confirme : Windows identifie `192.168.30.1` comme serveur DHCP.
+- suppression du DHCP Relay obsolète ;
+- conservation du serveur DHCP local FortiGate ;
+- déplacement de la plage dynamique vers `192.168.30.100-192.168.30.200` afin de séparer les adresses d'infrastructure des adresses clientes.
 
-La correction consiste donc à supprimer le relay obsolète et à conserver le DHCP local FortiGate.
-
-Autre point à corriger : la plage dynamique commence à `192.168.30.50`, alors que `192.168.30.50` est l'adresse statique du DC/DNS et `192.168.30.51` est configurée comme serveur PXE. Les adresses d'infrastructure doivent être exclues de la plage DHCP dynamique afin d'éviter les conflits.
+La validation finale côté client confirme que la nouvelle plage, la passerelle et le DNS Active Directory sont correctement distribués.
 
 ### Réseau `192.168.10.0/24`
 
@@ -149,7 +146,6 @@ Le FortiGate assure les fonctions de passerelle, pare-feu, segmentation VLAN et 
 
 ## À compléter
 
-- supprimer le DHCP relay obsolète vers `192.168.30.245` et revalider le client ;
-- exclure les adresses d'infrastructure de la plage DHCP dynamique ;
+- valider que `192.168.30.51` est toujours le serveur PXE/MECM attendu ;
 - expliquer le besoin des deux NICs sur `MININT-J8ODACM` et vérifier les métriques/routes ;
-- ajouter une preuve visuelle finale de la configuration VLAN30/DHCP corrigée.
+- ajouter les preuves visuelles finales de la configuration VLAN30/DHCP corrigée.
