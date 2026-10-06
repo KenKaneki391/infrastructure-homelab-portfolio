@@ -1,12 +1,10 @@
 # Projet 01 — Windows Server & Active Directory
 
-> **Statut : v1 terminée — prête à présenter à un recruteur.**
-
 ## Objectif
 
-Construire, administrer et dépanner un environnement Windows Server afin de démontrer des compétences directement transférables vers un poste de technicien infrastructure ou administrateur systèmes junior.
+Construire, administrer et dépanner un environnement Windows Server avec Active Directory, DNS, GPO, permissions de fichiers et intégration réseau FortiGate.
 
-Ce projet est basé sur des **preuves réelles de laboratoire** : architecture, commandes, captures sanitisées et scénarios de dépannage reproduits puis corrigés.
+Le projet s'appuie sur des configurations réelles du lab, des commandes de validation, des captures et plusieurs scénarios de dépannage reproduits puis corrigés.
 
 ## Environnement
 
@@ -14,7 +12,7 @@ Ce projet est basé sur des **preuves réelles de laboratoire** : architecture, 
 - domaine `lab.local` ;
 - FortiGate 80F — passerelle, firewall, VLAN et DHCP ;
 - `MININT-J8ODACM` — poste Windows 10 membre du domaine ;
-- réseaux de lab `192.168.10.0/24` et `192.168.30.0/24`.
+- réseaux `192.168.10.0/24` et `192.168.30.0/24`.
 
 Architecture détaillée : [ARCHITECTURE.md](ARCHITECTURE.md)
 
@@ -22,9 +20,9 @@ Architecture détaillée : [ARCHITECTURE.md](ARCHITECTURE.md)
 
 Le poste client a été validé comme membre du domaine avec secure channel fonctionnel et découverte correcte du contrôleur de domaine.
 
-Une GPO personnalisée `LAB-Workstations-Test` a ensuite été créée et liée à l'OU `Workstations`.
+Une GPO personnalisée `LAB-Workstations-Test` a été créée et liée à l'OU `Workstations`.
 
-Le scénario de dépannage GPO reproduit volontairement un problème de **Security Filtering** :
+Le scénario GPO reproduit volontairement un problème de **Security Filtering** :
 
 - la GPO reste liée à la bonne OU ;
 - le groupe `GG-GPO-Pilot` possède le droit d'appliquer la stratégie ;
@@ -53,7 +51,7 @@ DL-Finance-RW              (Domain Local Security)
 Permissions SMB / NTFS
 ```
 
-Le scénario démontre :
+Le scénario couvre :
 
 - permissions SMB `Change` ;
 - permissions NTFS `Modify` ;
@@ -68,32 +66,28 @@ Documentation : [SMB-NTFS-SCENARIO-SUMMARY.md](SMB-NTFS-SCENARIO-SUMMARY.md)
 
 ## Réseau / VLAN30 / DHCP
 
-Le VLAN30 a été vérifié directement sur le FortiGate et depuis le poste client.
-
-Configuration finale :
+Configuration finale validée :
 
 - interface `vlan30` / alias `Vlan30-VM` ;
 - VLAN ID `30` ;
 - passerelle `192.168.30.1/24` ;
 - DHCP local FortiGate actif ;
 - plage DHCP `192.168.30.100` à `192.168.30.200` ;
-- serveur DNS Active Directory distribué : `192.168.30.50` ;
-- PXE `next-server` configuré : `192.168.30.51` ;
-- boot file MECM/PXE : `SMSBoot\\LAB00002\\x64\\wdsnbp.com`.
+- DNS Active Directory distribué : `192.168.30.50`.
 
-Le client `MININT-J8ODACM` confirme après renouvellement du bail :
+Après renouvellement du bail, `MININT-J8ODACM` confirme :
 
 - IPv4 `192.168.30.100` ;
 - passerelle `192.168.30.1` ;
 - serveur DHCP `192.168.30.1` ;
 - DNS `192.168.30.50`.
 
-L'audit a permis d'identifier puis de corriger deux anomalies :
+L'audit a permis d'identifier puis de corriger :
 
-- un ancien DHCP Relay vers `192.168.30.245`, adresse sans serveur correspondant dans le lab ;
-- une plage DHCP qui incluait les adresses d'infrastructure `.50` et `.51`.
+- un ancien DHCP Relay vers `192.168.30.245`, sans serveur correspondant dans le lab ;
+- une plage DHCP initiale qui incluait l'adresse statique du DC/DNS `192.168.30.50`.
 
-La configuration a été nettoyée en supprimant le relay obsolète et en déplaçant la plage cliente vers `.100-.200`. La validation côté client confirme le résultat.
+Le relay obsolète a été supprimé et la plage cliente déplacée vers `.100-.200`.
 
 ## DNS et découverte Active Directory
 
@@ -104,7 +98,7 @@ Symptômes observés :
 - `Resolve-DnsName Win19.lab.local` en timeout ;
 - `nltest /dsgetdc:lab.local /force` retourne `ERROR_NO_SUCH_DOMAIN` ;
 - `gpupdate /force` échoue côté stratégie ordinateur ;
-- le contrôleur de domaine reste néanmoins joignable par IP.
+- le contrôleur de domaine reste joignable par IP.
 
 Le diagnostic a permis de distinguer **connectivité IP**, **service DNS**, **résolution de noms**, **découverte du DC** et **fonctionnement GPO**.
 
@@ -114,9 +108,7 @@ Documentation : [DNS-SCENARIO-SUMMARY.md](DNS-SCENARIO-SUMMARY.md)
 
 ## Troubleshooting
 
-Vue synthétique des incidents : [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-
-Méthode utilisée :
+Synthèse des incidents : [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
 ```text
 Symptôme
@@ -166,34 +158,32 @@ Validation finale
 
 ![Configuration finale VLAN30 et DHCP](assets/13-fortigate-vlan30-dhcp.jpg)
 
-La configuration GUI confirme l'interface VLAN30, la passerelle `192.168.30.1`, le scope client `192.168.30.100-192.168.30.200` et le DNS AD `192.168.30.50`.
+La configuration GUI confirme l'interface VLAN30, la passerelle `192.168.30.1`, la plage `192.168.30.100-192.168.30.200` et le DNS AD `192.168.30.50`.
 
 ![Scope DHCP VLAN30 en CLI](assets/14-fortigate-dhcp-scope-vlan30.jpg)
 
-La sortie CLI confirme le scope DHCP final et les paramètres PXE associés.
+La sortie CLI confirme le scope DHCP final et le DNS distribué.
 
 ![Validation DHCP et DNS côté client](assets/15-client-vlan30-dhcp-dns-validation.jpg)
 
-Après renouvellement du bail, le client reçoit bien une adresse de la nouvelle plage, la passerelle/DHCP `192.168.30.1` et le DNS AD `192.168.30.50`.
+Après renouvellement du bail, le client reçoit une adresse de la nouvelle plage, la passerelle/DHCP `192.168.30.1` et le DNS AD `192.168.30.50`.
 
 ## PowerShell
 
-Un script non destructif d'audit Active Directory est publié dans [`scripts/powershell`](../../scripts/powershell/README.md).
+Un script non destructif d'audit Active Directory est disponible dans [`scripts/powershell`](../../scripts/powershell/README.md).
 
-## Ce que ce projet démontre
+## Compétences mises en pratique
 
 - administration d'un domaine Windows ;
 - gestion des OU, groupes, postes et stratégies ;
-- compréhension du rôle critique de DNS dans Active Directory ;
-- ciblage de GPO et Security Filtering ;
+- DNS Active Directory ;
+- Group Policy et Security Filtering ;
 - permissions SMB vs NTFS ;
 - modèle AGDLP ;
-- segmentation VLAN et validation DHCP/DNS ;
-- audit et correction d'une configuration réseau obsolète ;
-- distinction authentification / autorisation ;
-- utilisation de PowerShell ;
-- dépannage structuré basé sur des preuves ;
-- documentation technique exploitable en entretien.
+- segmentation VLAN et DHCP ;
+- audit et correction d'une configuration réseau ;
+- PowerShell ;
+- diagnostic structuré et validation avant/après.
 
 ## Sécurité
 
