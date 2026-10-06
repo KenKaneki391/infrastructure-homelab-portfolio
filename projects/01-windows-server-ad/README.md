@@ -68,31 +68,30 @@ Documentation : [SMB-NTFS-SCENARIO-SUMMARY.md](SMB-NTFS-SCENARIO-SUMMARY.md)
 
 Le VLAN30 a été vérifié directement sur le FortiGate et depuis le poste client.
 
-Configuration observée :
+Configuration finale :
 
 - interface `vlan30` / alias `Vlan30-VM` ;
 - VLAN ID `30` ;
 - passerelle `192.168.30.1/24` ;
+- DHCP local FortiGate actif ;
+- plage DHCP `192.168.30.100` à `192.168.30.200` ;
 - serveur DNS Active Directory distribué : `192.168.30.50` ;
-- client `MININT-J8ODACM` : `192.168.30.52` ;
-- DHCP local FortiGate actif sur `vlan30` ;
-- plage DHCP observée : `192.168.30.50` à `192.168.30.200` ;
-- PXE `next-server` : `192.168.30.51` ;
+- PXE `next-server` configuré : `192.168.30.51` ;
 - boot file MECM/PXE : `SMSBoot\\LAB00002\\x64\\wdsnbp.com`.
 
-Le client confirme via `ipconfig /all` :
+Le client `MININT-J8ODACM` confirme après renouvellement du bail :
 
+- IPv4 `192.168.30.100` ;
 - passerelle `192.168.30.1` ;
-- serveur DHCP vu par Windows `192.168.30.1` ;
+- serveur DHCP `192.168.30.1` ;
 - DNS `192.168.30.50`.
 
-L'audit a également révélé un **ancien DHCP Relay vers `192.168.30.245`** encore présent sur `vlan30`. Cette adresse ne correspond à aucun serveur du laboratoire : il s'agit d'une configuration obsolète ajoutée par erreur. Le service réellement utilisé est le DHCP local du FortiGate.
+L'audit a permis d'identifier puis de corriger deux anomalies :
 
-La correction consiste à retirer ce relay obsolète et à conserver le DHCP local.
+- un ancien DHCP Relay vers `192.168.30.245`, adresse sans serveur correspondant dans le lab ;
+- une plage DHCP qui incluait les adresses d'infrastructure `.50` et `.51`.
 
-Autre amélioration identifiée : les IP d'infrastructure `192.168.30.50` (DC/DNS) et `192.168.30.51` (PXE) se trouvent actuellement dans la plage DHCP dynamique. Elles doivent être exclues afin d'éviter les conflits d'adresses.
-
-Cette découverte est conservée dans le portfolio car elle démontre une démarche d'audit réelle : comparaison entre la configuration du FortiGate et le comportement réellement observé côté client.
+La configuration a été nettoyée en supprimant le relay obsolète et en déplaçant la plage cliente vers `.100-.200`. La validation côté client confirme le résultat.
 
 ## DNS et découverte Active Directory
 
@@ -174,7 +173,7 @@ Un script non destructif d'audit Active Directory est publié dans [`scripts/pow
 - permissions SMB vs NTFS ;
 - modèle AGDLP ;
 - segmentation VLAN et validation DHCP/DNS ;
-- identification d'une configuration réseau obsolète ;
+- audit et correction d'une configuration réseau obsolète ;
 - distinction authentification / autorisation ;
 - utilisation de PowerShell ;
 - dépannage structuré basé sur des preuves ;
