@@ -22,13 +22,13 @@ flowchart LR
     PC -. DNS / AD .-> DC
 ```
 
-## Inventaire confirmé
+## Inventaire
 
 | Composant | Rôle | OS / Plateforme | Adresse | Notes |
 |---|---|---|---|---|
 | `Win19` | Domain Controller, DNS, File Server | Windows Server 2019 Datacenter Evaluation | `192.168.30.50/24` | IP statique |
 | FortiGate | Gateway, firewall, VLAN, DHCP | FortiGate 80F | `192.168.10.1` et `192.168.30.1` | DHCP local |
-| `MININT-J8ODACM` | Poste membre du domaine | Windows 10 build 19045 | `192.168.10.124/24` + `192.168.30.100/24` observés | Deux NICs actives, toutes deux en DHCP |
+| `MININT-J8ODACM` | Poste membre du domaine | Windows 10 build 19045 | `192.168.10.124/24` + `192.168.30.100/24` | Deux NICs utilisées pour les tests du lab |
 
 ## Domaine Active Directory
 
@@ -42,9 +42,9 @@ flowchart LR
 - **Site AD :** `site-lab`
 - **FSMO :** hébergés sur `Win19` dans ce lab à contrôleur unique
 
-## Rôles Windows Server confirmés
+## Rôles Windows Server
 
-Le serveur `Win19` héberge notamment :
+Le serveur `Win19` héberge :
 
 - Active Directory Domain Services (AD DS)
 - DNS Server
@@ -57,7 +57,7 @@ Le rôle DHCP n'est pas installé sur `Win19`.
 
 ## Structure logique Active Directory
 
-OU observées dans le laboratoire :
+OU utilisées dans le laboratoire :
 
 ```text
 lab.local
@@ -70,7 +70,8 @@ lab.local
 ├── Marketing
 ├── RD
 ├── Sales
-└── Support
+├── Support
+└── Workstations
 ```
 
 Le laboratoire contient également plusieurs comptes utilisateurs fictifs utilisés pour les tests d'administration, de stratégies et d'accès.
@@ -88,8 +89,6 @@ Configuration finale vérifiée sur le FortiGate :
 - **DHCP local FortiGate :** actif sur `vlan30`
 - **Plage DHCP :** `192.168.30.100` à `192.168.30.200`
 - **DNS distribué :** `192.168.30.50`
-- **PXE next-server configuré :** `192.168.30.51`
-- **Boot file :** `SMSBoot\\LAB00002\\x64\\wdsnbp.com`
 
 Le client `MININT-J8ODACM` confirme après renouvellement du bail :
 
@@ -100,10 +99,10 @@ Le client `MININT-J8ODACM` confirme après renouvellement du bail :
 
 ### Audit et correction DHCP
 
-L'audit a révélé deux problèmes de configuration :
+L'audit a révélé deux problèmes :
 
 1. un ancien DHCP Relay vers `192.168.30.245`, adresse qui ne correspond à aucun serveur du laboratoire ;
-2. une plage DHCP qui commençait à `192.168.30.50`, alors que `.50` est l'adresse statique du DC/DNS et `.51` est configurée comme `next-server` PXE.
+2. une plage DHCP qui commençait à `192.168.30.50`, alors que cette adresse est utilisée statiquement par le DC/DNS.
 
 Corrections appliquées :
 
@@ -111,7 +110,7 @@ Corrections appliquées :
 - conservation du serveur DHCP local FortiGate ;
 - déplacement de la plage dynamique vers `192.168.30.100-192.168.30.200` afin de séparer les adresses d'infrastructure des adresses clientes.
 
-La validation finale côté client confirme que la nouvelle plage, la passerelle et le DNS Active Directory sont correctement distribués.
+La validation finale côté client confirme la nouvelle plage, la passerelle et le DNS Active Directory.
 
 ### Réseau `192.168.10.0/24`
 
@@ -131,21 +130,12 @@ Le poste `MININT-J8ODACM` est confirmé membre de `lab.local` :
 - découverte du DC réussie via `nltest /dsgetdc:lab.local`
 - DC découvert : `Win19.lab.local` (`192.168.30.50`)
 - site AD détecté : `site-lab`
-- la stratégie ordinateur est appliquée depuis `Win19.lab.local`
-- `Default Domain Policy` apparaît dans les GPO ordinateur appliquées
+- `LAB-Workstations-Test` et `Default Domain Policy` validées côté ordinateur
 
-Le compte utilisé pendant cette validation était le compte **local** `Administrator` du poste. L'absence de GPO utilisateur de domaine dans ce test est donc attendue.
+## Note sur le poste multihomé
 
-## Point d'architecture à examiner
-
-`MININT-J8ODACM` possède actuellement deux interfaces actives, chacune avec sa propre passerelle par défaut (`192.168.10.1` et `192.168.30.1`). Cette configuration fonctionne dans le test actuel, mais elle doit être examinée avant d'être présentée comme design final, car plusieurs routes par défaut sur un poste multihomé peuvent rendre le chemin réseau dépendant des métriques d'interface.
+`MININT-J8ODACM` utilise deux interfaces réseau dans le cadre du laboratoire afin de tester les deux segments `192.168.10.0/24` et `192.168.30.0/24`. Cette configuration est propre au lab et n'est pas présentée comme un modèle de poste utilisateur en production.
 
 ## Choix d'architecture
 
-Le FortiGate assure les fonctions de passerelle, pare-feu, segmentation VLAN et DHCP pour le laboratoire. `Win19` possède une adresse statique car il fournit les services AD DS et DNS, qui doivent rester joignables de manière prévisible. Active Directory dépend fortement de DNS : les clients du domaine reçoivent donc `192.168.30.50` comme serveur DNS interne plutôt qu'un DNS public.
-
-## À compléter
-
-- valider que `192.168.30.51` est toujours le serveur PXE/MECM attendu ;
-- expliquer le besoin des deux NICs sur `MININT-J8ODACM` et vérifier les métriques/routes ;
-- ajouter les preuves visuelles finales de la configuration VLAN30/DHCP corrigée.
+Le FortiGate assure les fonctions de passerelle, pare-feu, segmentation VLAN et DHCP. `Win19` possède une adresse statique car il fournit les services AD DS et DNS. Les clients du domaine utilisent `192.168.30.50` comme DNS interne afin de permettre la résolution des enregistrements Active Directory et la découverte du contrôleur de domaine.
