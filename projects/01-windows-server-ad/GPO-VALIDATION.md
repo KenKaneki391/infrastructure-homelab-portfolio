@@ -1,14 +1,14 @@
 # Validation GPO — Workstations
 
-Cette page documente un test réel d'application d'une stratégie de groupe sur le poste `MININT-J8ODACM`.
+Cette page documente l'application d'une stratégie de groupe sur le poste `MININT-J8ODACM`.
 
 ## Objectif
 
-Valider qu'une GPO personnalisée liée à une OU de postes est bien reçue par un client du domaine et qu'elle produit effectivement la modification attendue sur Windows.
+Valider qu'une GPO personnalisée liée à une OU de postes est bien reçue par un client du domaine et qu'elle produit la modification attendue sur Windows.
 
 ## Ciblage
 
-Le poste a été déplacé dans l'OU :
+Le poste se trouve dans :
 
 ```text
 OU=Workstations,DC=lab,DC=local
@@ -52,7 +52,7 @@ gpupdate /force
 La commande suivante a permis de vérifier les stratégies effectivement appliquées :
 
 ```cmd
-gpresult /r
+gpresult /scope computer /r
 ```
 
 Résultats observés côté ordinateur :
@@ -67,11 +67,7 @@ Default Domain Policy
 Local Group Policy
 ```
 
-La stratégie a été appliquée depuis :
-
-```text
-Win19.lab.local
-```
+La stratégie a été appliquée depuis `Win19.lab.local`.
 
 ## Validation fonctionnelle
 
@@ -89,7 +85,7 @@ GPOApplied : yes
 
 ## Conclusion
 
-Le test démontre la chaîne complète suivante :
+Le test valide la chaîne suivante :
 
 ```text
 Objet ordinateur
@@ -105,8 +101,4 @@ gpresult confirme l'application
 Modification présente dans le registre
 ```
 
-Cette validation confirme la capacité à créer une OU, cibler une GPO sur un ensemble de postes, forcer l'actualisation des stratégies et vérifier à la fois l'état RSoP et l'effet réel de la configuration.
-
-## Prochain scénario
-
-Créer volontairement une situation où la GPO ne s'applique plus, puis diagnostiquer la cause à l'aide de `gpresult`, du scope de la GPO, du lien d'OU et éventuellement du filtrage de sécurité.
+Le scénario de dépannage associé au `Security Filtering` est documenté dans [GPO-SCENARIO-SUMMARY.md](GPO-SCENARIO-SUMMARY.md).
