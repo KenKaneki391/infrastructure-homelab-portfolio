@@ -1,12 +1,12 @@
 # Troubleshooting — Windows Server / Active Directory
 
-Ce projet documente plusieurs incidents et anomalies de configuration afin de démontrer une méthode de diagnostic structurée.
+Cette page résume les incidents reproduits ou rencontrés dans le laboratoire et la méthode utilisée pour les diagnostiquer.
 
 ## Scénarios validés
 
 ### GPO non appliquée — Security Filtering
 
-La GPO `LAB-Workstations-Test` ne s'appliquait plus au poste après modification du filtrage de sécurité. Le diagnostic a permis de confirmer que le lien d'OU et les permissions étaient corrects, puis d'identifier que le groupe `GG-GPO-Pilot` ne contenait pas le compte ordinateur.
+La GPO `LAB-Workstations-Test` ne s'appliquait plus au poste après modification du filtrage de sécurité. Le lien d'OU et les permissions étaient corrects, mais le groupe `GG-GPO-Pilot` ne contenait pas le compte ordinateur.
 
 **Cause racine :** poste absent du groupe utilisé pour le Security Filtering.
 
@@ -36,11 +36,11 @@ Détails : [DNS-SCENARIO-SUMMARY.md](DNS-SCENARIO-SUMMARY.md)
 
 ### Audit VLAN30 / DHCP — relay obsolète et scope mal délimité
 
-Un audit de la configuration FortiGate a révélé :
+L'audit de la configuration FortiGate a révélé :
 
 - un ancien DHCP Relay vers `192.168.30.245`, alors qu'aucun serveur n'existe à cette adresse ;
 - un serveur DHCP local FortiGate actif sur `vlan30` ;
-- une plage dynamique `192.168.30.50-192.168.30.200` qui incluait le DC/DNS `.50` et l'adresse `.51` configurée comme `next-server` PXE.
+- une plage dynamique `192.168.30.50-192.168.30.200` qui incluait l'adresse statique du DC/DNS `192.168.30.50`.
 
 **Cause racine :** ancienne configuration de relay jamais retirée et scope DHCP trop large.
 
@@ -57,21 +57,17 @@ Un audit de la configuration FortiGate a révélé :
 - serveur DHCP `192.168.30.1` ;
 - DNS `192.168.30.50`.
 
-Le scénario démontre la comparaison entre configuration réseau, comportement observé côté client, correction contrôlée et validation après renouvellement du bail.
-
 Détails : [ARCHITECTURE.md](ARCHITECTURE.md)
 
-## Méthode utilisée
+## Méthode de diagnostic
 
 Pour chaque incident :
 
-1. définir précisément le symptôme ou l'anomalie ;
+1. définir précisément le symptôme ;
 2. vérifier la connectivité et la configuration réelle ;
 3. comparer la configuration serveur avec le comportement observé côté client ;
 4. isoler la couche concernée ;
 5. identifier la cause racine ;
 6. effectuer une correction contrôlée ;
 7. valider le résultat ;
-8. documenter les preuves avant/après.
-
-L'objectif est de montrer le raisonnement de dépannage, pas seulement une liste de commandes.
+8. conserver les preuves avant/après.
