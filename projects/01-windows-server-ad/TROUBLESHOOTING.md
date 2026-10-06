@@ -1,6 +1,6 @@
 # Troubleshooting — Windows Server / Active Directory
 
-Ce projet documente trois incidents reproduits volontairement dans le laboratoire afin de démontrer une méthode de diagnostic structurée.
+Ce projet documente plusieurs incidents et anomalies de configuration afin de démontrer une méthode de diagnostic structurée.
 
 ## Scénarios validés
 
@@ -34,16 +34,44 @@ Le DNS du client a été volontairement remplacé par un serveur incorrect. La c
 
 Détails : [DNS-SCENARIO-SUMMARY.md](DNS-SCENARIO-SUMMARY.md)
 
+### Audit VLAN30 / DHCP — serveur local et relay configurés simultanément
+
+Un audit de la configuration FortiGate a révélé que `vlan30` disposait à la fois d'un serveur DHCP local et d'un DHCP Relay vers `192.168.30.245`.
+
+Le client `MININT-J8ODACM` reçoit actuellement :
+
+- IPv4 `192.168.30.52` ;
+- passerelle `192.168.30.1` ;
+- serveur DHCP `192.168.30.1` ;
+- DNS `192.168.30.50`.
+
+La configuration FortiGate confirme simultanément :
+
+- un serveur DHCP local sur `vlan30` ;
+- une plage dynamique `192.168.30.50-192.168.30.200` ;
+- DNS distribué `192.168.30.50` ;
+- PXE next-server `192.168.30.51` ;
+- un DHCP Relay vers `192.168.30.245`.
+
+**Cause racine :** configuration réseau incohérente avec deux modes DHCP présents sur la même interface.
+
+**Risque supplémentaire :** la plage DHCP dynamique inclut `192.168.30.50`, utilisé statiquement par le DC/DNS, ainsi que `192.168.30.51`, utilisé comme next-server PXE.
+
+**Correction prévue :** conserver un seul mode DHCP sur `vlan30` et séparer clairement les adresses d'infrastructure de la plage dynamique.
+
+Détails : [ARCHITECTURE.md](ARCHITECTURE.md)
+
 ## Méthode utilisée
 
 Pour chaque incident :
 
-1. définir précisément le symptôme ;
-2. vérifier la connectivité ;
-3. vérifier DNS et la découverte des services ;
-4. vérifier l'identité, les groupes et le scope ;
-5. effectuer une seule correction contrôlée ;
-6. valider le résultat ;
-7. documenter la cause racine.
+1. définir précisément le symptôme ou l'anomalie ;
+2. vérifier la connectivité et la configuration réelle ;
+3. comparer la configuration serveur avec le comportement observé côté client ;
+4. isoler la couche concernée ;
+5. identifier la cause racine ;
+6. effectuer une correction contrôlée ;
+7. valider le résultat ;
+8. documenter les preuves avant/après.
 
 L'objectif est de montrer le raisonnement de dépannage, pas seulement une liste de commandes.
