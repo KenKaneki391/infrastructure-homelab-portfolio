@@ -7,9 +7,9 @@ Cette page décrit la topologie réellement utilisée dans le laboratoire person
 ```mermaid
 flowchart LR
     INTERNET[Internet]
-    FG[FortiGate\nGateway / Firewall / DHCP]
+    FG[FortiGate\nGateway / Firewall]
     NET10[Réseau lab A\n192.168.10.0/24]
-    NET30[Réseau lab B\n192.168.30.0/24]
+    NET30[Réseau lab B / VLAN 30\n192.168.30.0/24]
     DC[Win19\nWindows Server 2019 Datacenter Eval\n192.168.30.50\nAD DS + DNS + File Server]
     PC[MININT-J8ODACM\nWindows 10\nDomain member\n2 NICs]
 
@@ -27,7 +27,7 @@ flowchart LR
 | Composant | Rôle | OS / Plateforme | Adresse | Notes |
 |---|---|---|---|---|
 | `Win19` | Domain Controller, DNS, File Server | Windows Server 2019 Datacenter Evaluation | `192.168.30.50/24` | IP statique |
-| FortiGate | Gateway, firewall, DHCP | FortiGate | `192.168.10.1` et `192.168.30.1` observés comme gateways DHCP | Distribue les paramètres réseau aux clients |
+| FortiGate | Gateway, firewall, VLAN, DHCP | FortiGate 80F | `192.168.10.1` et `192.168.30.1` | DHCP local confirmé sur plusieurs interfaces |
 | `MININT-J8ODACM` | Poste membre du domaine | Windows 10 build 19045 | `192.168.10.124/24` + `192.168.30.52/24` | Deux NICs actives, toutes deux en DHCP |
 
 ## Domaine Active Directory
@@ -53,7 +53,7 @@ Le serveur `Win19` héberge notamment :
 - Outils RSAT / module Active Directory PowerShell
 - Windows Defender Antivirus
 
-Le service DHCP **n'est pas installé sur Windows Server** : il est fourni par le FortiGate.
+Le rôle DHCP n'est pas installé sur `Win19`.
 
 ## Structure logique Active Directory
 
@@ -77,14 +77,44 @@ Le laboratoire contient également plusieurs comptes utilisateurs fictifs utilis
 
 ## Réseau
 
-### Réseau 192.168.30.0/24
+### VLAN 30 — `192.168.30.0/24`
 
-- **Passerelle :** `192.168.30.1` (FortiGate)
+Configuration vérifiée sur le FortiGate :
+
+- **Interface :** `vlan30` / alias `Vlan30-VM`
+- **VLAN ID :** `30`
+- **Passerelle :** `192.168.30.1/24`
 - **DC / DNS :** `192.168.30.50`
 - **Client observé :** `192.168.30.52`
-- **DHCP :** FortiGate
+- **DHCP local FortiGate :** actif sur `vlan30`
+- **Plage DHCP observée :** `192.168.30.50` à `192.168.30.200`
+- **DNS distribué :** `192.168.30.50`
+- **PXE next-server :** `192.168.30.51`
+- **Boot file :** `SMSBoot\\LAB00002\\x64\\wdsnbp.com`
 
-### Réseau 192.168.10.0/24
+Le client `MININT-J8ODACM` confirme via `ipconfig /all` :
+
+- IPv4 `192.168.30.52`
+- passerelle `192.168.30.1`
+- serveur DHCP vu par Windows `192.168.30.1`
+- serveur DNS `192.168.30.50`
+
+### Point de configuration découvert
+
+L'interface `vlan30` possède également :
+
+```text
+set dhcp-relay-service enable
+set dhcp-relay-ip "192.168.30.245"
+```
+
+Cette configuration coexiste avec un serveur DHCP local FortiGate (`config system dhcp server`, `edit 30`) sur la même interface. Le client reçoit actuellement son bail du FortiGate (`192.168.30.1`), ce qui confirme que le service DHCP local est actif.
+
+Ce point est documenté comme **anomalie de configuration à corriger** : l'architecture doit utiliser un mode DHCP clairement défini au lieu de conserver simultanément un serveur local et un relay sur le même VLAN.
+
+Autre point à corriger : la plage dynamique commence à `192.168.30.50`, alors que `192.168.30.50` est l'adresse statique du DC/DNS et `192.168.30.51` est configurée comme serveur PXE. Les adresses d'infrastructure doivent être exclues de la plage DHCP dynamique afin d'éviter les conflits.
+
+### Réseau `192.168.10.0/24`
 
 - **Passerelle :** `192.168.10.1` (FortiGate)
 - **Client observé :** `192.168.10.124`
@@ -113,12 +143,11 @@ Le compte utilisé pendant cette validation était le compte **local** `Administ
 
 ## Choix d'architecture
 
-Le FortiGate assure les fonctions de passerelle, pare-feu et DHCP afin de séparer les fonctions réseau des rôles Windows Server. `Win19` possède une adresse statique car il fournit les services AD DS et DNS, qui doivent rester joignables de manière prévisible. Active Directory dépend fortement de DNS : les clients du domaine reçoivent donc `192.168.30.50` comme serveur DNS interne plutôt qu'un DNS public. L'organisation en OU par départements permet de pratiquer le ciblage des GPO et l'administration déléguée.
+Le FortiGate assure les fonctions de passerelle, pare-feu, segmentation VLAN et DHCP pour le laboratoire. `Win19` possède une adresse statique car il fournit les services AD DS et DNS, qui doivent rester joignables de manière prévisible. Active Directory dépend fortement de DNS : les clients du domaine reçoivent donc `192.168.30.50` comme serveur DNS interne plutôt qu'un DNS public.
 
 ## À compléter
 
+- corriger la coexistence DHCP local / DHCP relay sur `vlan30` ;
+- exclure les adresses d'infrastructure de la plage DHCP dynamique ;
 - expliquer le besoin des deux NICs sur `MININT-J8ODACM` et vérifier les métriques/routes ;
-- documenter les GPO personnalisées ;
-- connecter un utilisateur de domaine pour valider les GPO utilisateur ;
-- documenter les partages SMB et permissions NTFS ;
-- ajouter une capture ou un diagramme final de la topologie.
+- ajouter une preuve visuelle finale de la configuration VLAN30/DHCP corrigée.
