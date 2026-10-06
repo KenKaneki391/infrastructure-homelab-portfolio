@@ -1,0 +1,28 @@
+# Secrets / credentials
+.env
+.env.*
+*.key
+*.pem
+*.pfx
+*.p12
+*.token
+secrets.*
+credentials.*
+
+# Configuration exports that may contain sensitive data
+*.cfg
+*.conf
+*.bak
+*.backup
+*.zip
+*.7z
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.log
