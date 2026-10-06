@@ -34,9 +34,9 @@ Le DNS du client a été volontairement remplacé par un serveur incorrect. La c
 
 Détails : [DNS-SCENARIO-SUMMARY.md](DNS-SCENARIO-SUMMARY.md)
 
-### Audit VLAN30 / DHCP — serveur local et relay configurés simultanément
+### Audit VLAN30 / DHCP — relay obsolète découvert
 
-Un audit de la configuration FortiGate a révélé que `vlan30` disposait à la fois d'un serveur DHCP local et d'un DHCP Relay vers `192.168.30.245`.
+Un audit de la configuration FortiGate a révélé qu'un DHCP Relay vers `192.168.30.245` était encore activé sur `vlan30`, alors qu'aucun serveur n'existe à cette adresse dans le laboratoire.
 
 Le client `MININT-J8ODACM` reçoit actuellement :
 
@@ -45,19 +45,19 @@ Le client `MININT-J8ODACM` reçoit actuellement :
 - serveur DHCP `192.168.30.1` ;
 - DNS `192.168.30.50`.
 
-La configuration FortiGate confirme simultanément :
+La configuration FortiGate confirme également :
 
-- un serveur DHCP local sur `vlan30` ;
+- un serveur DHCP local actif sur `vlan30` ;
 - une plage dynamique `192.168.30.50-192.168.30.200` ;
 - DNS distribué `192.168.30.50` ;
 - PXE next-server `192.168.30.51` ;
-- un DHCP Relay vers `192.168.30.245`.
+- un ancien relay vers `192.168.30.245`.
 
-**Cause racine :** configuration réseau incohérente avec deux modes DHCP présents sur la même interface.
+**Cause racine :** ancienne configuration de DHCP Relay ajoutée par erreur et jamais retirée.
 
-**Risque supplémentaire :** la plage DHCP dynamique inclut `192.168.30.50`, utilisé statiquement par le DC/DNS, ainsi que `192.168.30.51`, utilisé comme next-server PXE.
+**Correction prévue :** supprimer le relay obsolète et conserver le DHCP local FortiGate.
 
-**Correction prévue :** conserver un seul mode DHCP sur `vlan30` et séparer clairement les adresses d'infrastructure de la plage dynamique.
+**Risque supplémentaire :** la plage DHCP dynamique inclut `192.168.30.50`, utilisé statiquement par le DC/DNS, ainsi que `192.168.30.51`, utilisé comme next-server PXE. Ces adresses d'infrastructure doivent être retirées de la plage dynamique.
 
 Détails : [ARCHITECTURE.md](ARCHITECTURE.md)
 
