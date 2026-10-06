@@ -6,11 +6,11 @@ L'objectif est simple : ne pas seulement lister des technologies, mais montrer c
 
 ## Projet principal
 
-### Windows Server & Active Directory
+### Windows Server & Active Directory — v1 terminée ✅
 
 [Voir le projet](projects/01-windows-server-ad/README.md)
 
-Environnement documenté autour de Windows Server 2019, Active Directory, DNS, Group Policy, SMB/NTFS et PowerShell, avec intégration réseau FortiGate pour la passerelle et le DHCP.
+Environnement documenté autour de Windows Server 2019, Active Directory, DNS, Group Policy, SMB/NTFS, PowerShell et FortiGate.
 
 Compétences démontrées :
 
@@ -21,14 +21,16 @@ Compétences démontrées :
 - jointure et validation d'un poste de domaine ;
 - permissions SMB et NTFS ;
 - modèle AGDLP ;
+- VLAN, DHCP et intégration FortiGate ;
 - PowerShell ;
-- dépannage méthodique Windows / AD.
+- dépannage méthodique Windows / AD / réseau.
 
-Trois incidents ont été reproduits et documentés de bout en bout :
+Quatre scénarios sont documentés de bout en bout :
 
 1. **GPO non appliquée** à cause du Security Filtering ;
 2. **Access is denied** sur un partage SMB à cause d'une mauvaise appartenance de groupe et d'un ancien contexte de session ;
-3. **Découverte Active Directory en panne** à cause d'un DNS client incorrect.
+3. **Découverte Active Directory en panne** à cause d'un DNS client incorrect ;
+4. **Audit VLAN30 / DHCP** avec suppression d'un relay obsolète, correction du scope et validation client après renouvellement du bail.
 
 Chaque scénario suit la même logique : **symptôme → tests → cause racine → correction → validation**.
 
@@ -59,7 +61,7 @@ Actuellement :
 
 ## Roadmap
 
-Les prochains projets publics seront ajoutés uniquement après validation pratique et documentation :
+Prochains projets publics :
 
 - MECM / SCCM ;
 - FortiGate ;
