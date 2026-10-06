@@ -34,30 +34,30 @@ Le DNS du client a été volontairement remplacé par un serveur incorrect. La c
 
 Détails : [DNS-SCENARIO-SUMMARY.md](DNS-SCENARIO-SUMMARY.md)
 
-### Audit VLAN30 / DHCP — relay obsolète découvert
+### Audit VLAN30 / DHCP — relay obsolète et scope mal délimité
 
-Un audit de la configuration FortiGate a révélé qu'un DHCP Relay vers `192.168.30.245` était encore activé sur `vlan30`, alors qu'aucun serveur n'existe à cette adresse dans le laboratoire.
+Un audit de la configuration FortiGate a révélé :
 
-Le client `MININT-J8ODACM` reçoit actuellement :
+- un ancien DHCP Relay vers `192.168.30.245`, alors qu'aucun serveur n'existe à cette adresse ;
+- un serveur DHCP local FortiGate actif sur `vlan30` ;
+- une plage dynamique `192.168.30.50-192.168.30.200` qui incluait le DC/DNS `.50` et l'adresse `.51` configurée comme `next-server` PXE.
 
-- IPv4 `192.168.30.52` ;
+**Cause racine :** ancienne configuration de relay jamais retirée et scope DHCP trop large.
+
+**Correction :**
+
+- suppression du DHCP Relay obsolète ;
+- conservation du DHCP local FortiGate ;
+- déplacement de la plage DHCP vers `192.168.30.100-192.168.30.200`.
+
+**Validation finale côté client :**
+
+- IPv4 `192.168.30.100` ;
 - passerelle `192.168.30.1` ;
 - serveur DHCP `192.168.30.1` ;
 - DNS `192.168.30.50`.
 
-La configuration FortiGate confirme également :
-
-- un serveur DHCP local actif sur `vlan30` ;
-- une plage dynamique `192.168.30.50-192.168.30.200` ;
-- DNS distribué `192.168.30.50` ;
-- PXE next-server `192.168.30.51` ;
-- un ancien relay vers `192.168.30.245`.
-
-**Cause racine :** ancienne configuration de DHCP Relay ajoutée par erreur et jamais retirée.
-
-**Correction prévue :** supprimer le relay obsolète et conserver le DHCP local FortiGate.
-
-**Risque supplémentaire :** la plage DHCP dynamique inclut `192.168.30.50`, utilisé statiquement par le DC/DNS, ainsi que `192.168.30.51`, utilisé comme next-server PXE. Ces adresses d'infrastructure doivent être retirées de la plage dynamique.
+Le scénario démontre la comparaison entre configuration réseau, comportement observé côté client, correction contrôlée et validation après renouvellement du bail.
 
 Détails : [ARCHITECTURE.md](ARCHITECTURE.md)
 
