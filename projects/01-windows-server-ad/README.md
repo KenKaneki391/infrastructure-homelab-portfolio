@@ -86,11 +86,13 @@ Le client confirme via `ipconfig /all` :
 - serveur DHCP vu par Windows `192.168.30.1` ;
 - DNS `192.168.30.50`.
 
-L'audit de configuration a également révélé un **DHCP Relay vers `192.168.30.245` configuré simultanément avec le serveur DHCP local** sur la même interface. Ce point est documenté comme anomalie à corriger.
+L'audit a également révélé un **ancien DHCP Relay vers `192.168.30.245`** encore présent sur `vlan30`. Cette adresse ne correspond à aucun serveur du laboratoire : il s'agit d'une configuration obsolète ajoutée par erreur. Le service réellement utilisé est le DHCP local du FortiGate.
+
+La correction consiste à retirer ce relay obsolète et à conserver le DHCP local.
 
 Autre amélioration identifiée : les IP d'infrastructure `192.168.30.50` (DC/DNS) et `192.168.30.51` (PXE) se trouvent actuellement dans la plage DHCP dynamique. Elles doivent être exclues afin d'éviter les conflits d'adresses.
 
-Cette découverte est volontairement conservée dans le portfolio : elle démontre une démarche d'audit réelle plutôt qu'une architecture présentée artificiellement comme parfaite.
+Cette découverte est conservée dans le portfolio car elle démontre une démarche d'audit réelle : comparaison entre la configuration du FortiGate et le comportement réellement observé côté client.
 
 ## DNS et découverte Active Directory
 
@@ -172,7 +174,7 @@ Un script non destructif d'audit Active Directory est publié dans [`scripts/pow
 - permissions SMB vs NTFS ;
 - modèle AGDLP ;
 - segmentation VLAN et validation DHCP/DNS ;
-- identification d'anomalies de configuration réseau ;
+- identification d'une configuration réseau obsolète ;
 - distinction authentification / autorisation ;
 - utilisation de PowerShell ;
 - dépannage structuré basé sur des preuves ;
