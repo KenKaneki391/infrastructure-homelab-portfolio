@@ -1,18 +1,16 @@
 # Infrastructure & Cloud Homelab Portfolio
 
-Portfolio technique orienté **administration systèmes, infrastructure Microsoft, endpoint management, réseau et automatisation**.
+Portfolio technique orienté **administration systèmes, infrastructure Microsoft, réseau et automatisation**.
 
-L'objectif est simple : ne pas seulement lister des technologies, mais montrer ce que j'ai **configuré, testé, cassé, diagnostiqué et corrigé** dans un environnement de laboratoire personnel.
+L'objectif est de documenter ce que j'ai réellement **configuré, testé, diagnostiqué et corrigé** dans un environnement de laboratoire personnel.
 
-## Projet principal
-
-### Windows Server & Active Directory — v1 terminée ✅
+## Windows Server & Active Directory
 
 [Voir le projet](projects/01-windows-server-ad/README.md)
 
 Environnement documenté autour de Windows Server 2019, Active Directory, DNS, Group Policy, SMB/NTFS, PowerShell et FortiGate.
 
-Compétences démontrées :
+Compétences couvertes :
 
 - Active Directory Domain Services ;
 - DNS Active Directory ;
@@ -36,13 +34,11 @@ Chaque scénario suit la même logique : **symptôme → tests → cause racine 
 
 ## PowerShell
 
-Les scripts publiés se trouvent dans [`scripts/powershell`](scripts/powershell/README.md).
-
-Actuellement :
+Les scripts utilisés dans le lab sont regroupés dans [`scripts/powershell`](scripts/powershell/README.md).
 
 - `Get-ADInactiveUsers.ps1` — audit non destructif de comptes Active Directory inactifs.
 
-## Technologies
+## Technologies documentées
 
 - Windows Server
 - Active Directory Domain Services
@@ -50,27 +46,14 @@ Actuellement :
 - SMB / NTFS
 - PowerShell
 - FortiGate
-- Microsoft Azure
-- Microsoft Intune / Entra ID
-- MECM / SCCM
 
 ## Certifications
 
 - Microsoft Certified: **Azure Administrator Associate (AZ-104)**
 - Microsoft Certified: **Endpoint Administrator Associate (MD-102)**
 
-## Roadmap
-
-Prochains projets publics :
-
-- MECM / SCCM ;
-- FortiGate ;
-- Intune / Entra ID ;
-- Azure ;
-- automatisation avec PowerShell, Terraform ou Bicep.
-
 ## Sécurité
 
 Ce dépôt contient uniquement du matériel provenant d'un laboratoire personnel.
 
-Aucun secret, credential, token, donnée d'employeur ou information client ne doit être publié. Voir [`SECURITY.md`](SECURITY.md).
+Aucun secret, credential, token, donnée d'employeur ou information client n'est publié. Voir [`SECURITY.md`](SECURITY.md).
