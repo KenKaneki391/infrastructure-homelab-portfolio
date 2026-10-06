@@ -1,5 +1,7 @@
 # Projet 01 — Windows Server & Active Directory
 
+> **Statut : v1 terminée — prête à présenter à un recruteur.**
+
 ## Objectif
 
 Construire, administrer et dépanner un environnement Windows Server afin de démontrer des compétences directement transférables vers un poste de technicien infrastructure ou administrateur systèmes junior.
@@ -159,6 +161,20 @@ Validation finale
 ![DNS restauré et AD fonctionnel](assets/11-dns-restored-ad-success.jpg)
 
 ![Zone DNS lab.local](assets/12-dns-zone-lab-local.jpg)
+
+### FortiGate / VLAN30 / DHCP
+
+![Configuration finale VLAN30 et DHCP](assets/13-fortigate-vlan30-dhcp.jpg)
+
+La configuration GUI confirme l'interface VLAN30, la passerelle `192.168.30.1`, le scope client `192.168.30.100-192.168.30.200` et le DNS AD `192.168.30.50`.
+
+![Scope DHCP VLAN30 en CLI](assets/14-fortigate-dhcp-scope-vlan30.jpg)
+
+La sortie CLI confirme le scope DHCP final et les paramètres PXE associés.
+
+![Validation DHCP et DNS côté client](assets/15-client-vlan30-dhcp-dns-validation.jpg)
+
+Après renouvellement du bail, le client reçoit bien une adresse de la nouvelle plage, la passerelle/DHCP `192.168.30.1` et le DNS AD `192.168.30.50`.
 
 ## PowerShell
 
