@@ -1,6 +1,6 @@
 # PowerShell — Scripts de laboratoire
 
-Ce dossier contient uniquement des scripts que je peux expliquer et défendre en entretien.
+Ce dossier regroupe les scripts PowerShell utilisés dans le lab.
 
 ## `Get-ADInactiveUsers.ps1`
 
@@ -12,4 +12,4 @@ Exemple :
 .\Get-ADInactiveUsers.ps1 -InactiveDays 90
 ```
 
-Le script accepte un paramètre plutôt qu'une valeur codée en dur et ne modifie aucun objet Active Directory.
+Le nombre de jours est fourni par paramètre et le script ne modifie aucun objet Active Directory.
