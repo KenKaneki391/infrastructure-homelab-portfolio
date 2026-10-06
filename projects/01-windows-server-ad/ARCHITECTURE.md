@@ -99,18 +99,20 @@ Le client `MININT-J8ODACM` confirme via `ipconfig /all` :
 - serveur DHCP vu par Windows `192.168.30.1`
 - serveur DNS `192.168.30.50`
 
-### Point de configuration découvert
+### Configuration obsolète découverte
 
-L'interface `vlan30` possède également :
+L'interface `vlan30` contient encore :
 
 ```text
 set dhcp-relay-service enable
 set dhcp-relay-ip "192.168.30.245"
 ```
 
-Cette configuration coexiste avec un serveur DHCP local FortiGate (`config system dhcp server`, `edit 30`) sur la même interface. Le client reçoit actuellement son bail du FortiGate (`192.168.30.1`), ce qui confirme que le service DHCP local est actif.
+L'adresse `192.168.30.245` ne correspond à aucun serveur DHCP existant dans le laboratoire. Il s'agit d'une ancienne configuration de relay ajoutée par erreur et devenue obsolète.
 
-Ce point est documenté comme **anomalie de configuration à corriger** : l'architecture doit utiliser un mode DHCP clairement défini au lieu de conserver simultanément un serveur local et un relay sur le même VLAN.
+Le service DHCP réellement utilisé sur VLAN30 est le **serveur DHCP local du FortiGate** (`config system dhcp server`, `edit 30`). Le comportement côté client le confirme : Windows identifie `192.168.30.1` comme serveur DHCP.
+
+La correction consiste donc à supprimer le relay obsolète et à conserver le DHCP local FortiGate.
 
 Autre point à corriger : la plage dynamique commence à `192.168.30.50`, alors que `192.168.30.50` est l'adresse statique du DC/DNS et `192.168.30.51` est configurée comme serveur PXE. Les adresses d'infrastructure doivent être exclues de la plage DHCP dynamique afin d'éviter les conflits.
 
@@ -147,7 +149,7 @@ Le FortiGate assure les fonctions de passerelle, pare-feu, segmentation VLAN et 
 
 ## À compléter
 
-- corriger la coexistence DHCP local / DHCP relay sur `vlan30` ;
+- supprimer le DHCP relay obsolète vers `192.168.30.245` et revalider le client ;
 - exclure les adresses d'infrastructure de la plage DHCP dynamique ;
 - expliquer le besoin des deux NICs sur `MININT-J8ODACM` et vérifier les métriques/routes ;
 - ajouter une preuve visuelle finale de la configuration VLAN30/DHCP corrigée.
