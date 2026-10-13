@@ -36,7 +36,7 @@ Chaque scénario suit la même logique : **symptôme → tests → cause racine 
 
 [Voir le projet](projects/02-mecm/README.md)
 
-Déploiement d'un site Microsoft Configuration Manager 2509 dans le lab, intégration Active Directory, onboarding d'un poste Windows 10 et déploiement applicatif EXE via Software Center.
+**Projet terminé.** Déploiement d'un site Microsoft Configuration Manager 2509 dans le lab, intégration Active Directory, onboarding d'un poste Windows 10 et déploiement applicatif EXE via Software Center.
 
 Compétences couvertes :
 
