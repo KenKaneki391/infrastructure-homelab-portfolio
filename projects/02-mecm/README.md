@@ -129,6 +129,24 @@ AppEnforce.log confirme l'exécution en contexte machine depuis le cache MECM :
 
 Documentation : [APPLICATION-DEPLOYMENT.md](APPLICATION-DEPLOYMENT.md)
 
+## Preuves visuelles
+
+### Site et rôles
+
+![Vue du site MTP](assets/01-mecm-site-mtp-overview.jpg)
+
+![Rôles du serveur MECM](assets/02-mecm-site-system-roles.jpg)
+
+### Client géré
+
+![Client Windows 10 géré par le site MTP](assets/04-client-managed-mtp.jpg)
+
+### Déploiement applicatif
+
+![Distribution du contenu 7-Zip réussie](assets/08-7zip-content-distribution-success.jpg)
+
+![7-Zip installé dans Software Center](assets/10-software-center-7zip-installed.jpg)
+
 ## Troubleshooting
 
 Synthèse des incidents : [TROUBLESHOOTING.md](TROUBLESHOOTING.md)

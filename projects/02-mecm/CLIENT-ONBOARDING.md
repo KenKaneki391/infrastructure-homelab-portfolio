@@ -31,6 +31,10 @@ Configuration :
 - site assignment : MTP ;
 - site system : MECM.lab.local.
 
+### Validation du Boundary Group
+
+![Boundary Group VLAN30](assets/03-boundary-group-vlan30.jpg)
+
 ## Client Push Installation
 
 Le client a été déployé avec **Client Push Installation**.
@@ -95,6 +99,10 @@ Dans la console MECM :
     Site Code : MTP
 
 Le poste est alors géré par le site et peut recevoir des stratégies, applications et actions clientes.
+
+### Validation visuelle du client
+
+![MININT-J8ODACM géré par MTP](assets/04-client-managed-mtp.jpg)
 
 ## Points techniques validés
 

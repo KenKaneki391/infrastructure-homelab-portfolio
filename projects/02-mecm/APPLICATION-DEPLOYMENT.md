@@ -18,6 +18,10 @@ Le poste MININT-J8ODACM est ajouté comme membre direct.
 
 Cette séparation permet de tester un déploiement sur une cible contrôlée avant une éventuelle généralisation.
 
+### Validation de la collection pilote
+
+![Collection LAB - Pilot Workstations](assets/05-pilot-device-collection.jpg)
+
 ## Deployment Type
 
 Type :
@@ -34,6 +38,14 @@ Contexte :
 
 La détection est basée sur la présence de l'installation 7-Zip sous Program Files.
 
+### Configuration du Deployment Type
+
+![Deployment Type EXE de 7-Zip](assets/06-7zip-exe-deployment-type.jpg)
+
+### Méthode de détection
+
+![Méthode de détection 7-Zip](assets/07-7zip-detection-method.jpg)
+
 ## Distribution et déploiement
 
 Le contenu a été distribué sur le Distribution Point MECM.lab.local.
@@ -44,6 +56,10 @@ L'application a ensuite été déployée vers :
 
 Après récupération de la stratégie, l'application est apparue dans Software Center.
 
+### Distribution du contenu
+
+![Distribution du contenu 7-Zip réussie](assets/08-7zip-content-distribution-success.jpg)
+
 ## Validation dans Software Center
 
 L'application a été installée depuis Software Center et son état est passé à :
@@ -51,6 +67,12 @@ L'application a été installée depuis Software Center et son état est passé 
     Installed
 
 Le bouton Uninstall est également disponible, ce qui confirme que le Deployment Type est reconnu comme installé.
+
+### Preuves Software Center
+
+![7-Zip disponible dans Software Center](assets/09-software-center-7zip-available.jpg)
+
+![7-Zip installé dans Software Center](assets/10-software-center-7zip-installed.jpg)
 
 ## AppDiscovery.log
 

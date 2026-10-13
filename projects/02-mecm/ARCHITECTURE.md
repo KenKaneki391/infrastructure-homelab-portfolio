@@ -48,6 +48,12 @@ Le serveur de lab héberge les rôles nécessaires au scénario :
 
 L'architecture all-in-one est volontaire : elle permet de pratiquer le fonctionnement de MECM sans ajouter de complexité de production inutile au laboratoire.
 
+### Validation visuelle du site
+
+![Vue du site MTP](assets/01-mecm-site-mtp-overview.jpg)
+
+![Rôles du serveur MECM](assets/02-mecm-site-system-roles.jpg)
+
 ## Active Directory
 
 Domaine :
@@ -79,6 +85,10 @@ Références :
 - site system : MECM.lab.local.
 
 Le boundary permet au client de déterminer qu'il appartient à un réseau géré par le site. Le boundary group associe ensuite ce réseau au site et au site system utilisé pour les services et le contenu.
+
+### Boundary Group
+
+![Boundary Group VLAN30](assets/03-boundary-group-vlan30.jpg)
 
 ## Client géré
 
